@@ -1,5 +1,12 @@
 fastapi
-uvicorn
+uvicorn[standard]
 streamlit
 pydantic
+pydantic-settings
+python-dotenv
+requests
 pytest
+httpx
+google-cloud-bigquery
+google-cloud-aiplatform
+numpy
