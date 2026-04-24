@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant User
+    participant UI
+    participant API
+    participant Retriever
+    participant LLM
+    participant Guardrails
+    participant Warehouse
+
+    User->>UI: Enter question
+    UI->>API: POST /query
+    API->>Retriever: Fetch context
+    Retriever-->>API: Metadata context
+    API->>LLM: Generate SQL (question + context)
+    LLM-->>API: SQL statement
+    API->>Guardrails: Validate SQL
+    Guardrails-->>API: valid/invalid
+    alt valid and execute=true
+        API->>Warehouse: Execute SQL
+        Warehouse-->>API: Result set
+    else not valid or execute=false
+        API-->>API: Skip execution
+    end
+    API-->>UI: SQL + result + warnings
