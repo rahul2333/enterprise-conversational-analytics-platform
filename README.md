@@ -2,7 +2,7 @@
 
 Enterprise-grade conversational analytics reference implementation on Google Cloud Platform. The platform enables natural-language questions over governed analytical datasets using a semantic metadata layer, retrieval-augmented generation, validated SQL generation, BigQuery execution, and a secure API surface.
 
-> This is a public portfolio project. It intentionally avoids client-specific terminology, internal architecture names, and proprietary implementation details.
+> This is a public portfolio project.
 
 ## Objectives
 
