@@ -1,17 +1,12 @@
 from fastapi import FastAPI
 
-from src.core.models import QueryRequest, QueryResponse
 from src.ai_engine.gemini_provider import GeminiProvider
-from src.retrieval.vector_search import VectorSearch
 from src.api.guardrails import validate_sql
-
-# Optional imports guarded at runtime
-try:
-    from src.data.bigquery_executor import BigQueryExecutor
-    from src.core.config import settings
-    _bq_available = True
-except Exception:
-    _bq_available = False
+from src.core.config import settings
+from src.core.models import QueryRequest, QueryResponse
+from src.data.bigquery_executor import BigQueryExecutor
+from src.retrieval.vector_search import VectorSearch
+from src.security.sql_guardrails import validate_read_only_sql
 
 app = FastAPI(title="Enterprise Conversational Analytics API")
 
@@ -20,7 +15,7 @@ llm = GeminiProvider()
 retriever = VectorSearch()
 executor = None
 
-if _bq_available and getattr(settings, "bq_project", None):
+if getattr(settings, "bq_project", None):
     try:
         executor = BigQueryExecutor(project=settings.bq_project)
     except Exception:
@@ -45,7 +40,14 @@ def query(req: QueryRequest):
 
     # 3) Validate SQL (guardrails)
     is_valid = validate_sql(sql)
-    if not is_valid:
+    if is_valid:
+        try:
+            validate_read_only_sql(sql)
+        except ValueError as exc:
+            is_valid = False
+            warnings.append(str(exc))
+
+    if not is_valid and not warnings:
         warnings.append("SQL failed validation; execution blocked")
 
     # 4) Execute (optional)
