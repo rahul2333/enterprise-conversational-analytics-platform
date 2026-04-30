@@ -10,6 +10,15 @@ def test_health():
     assert res.status_code == 200
 
 
+def test_query_allows_select_with_leading_comment():
+    response = client.post("/query", json={"question": "show sales by region", "execute": False})
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["is_sql_valid"] is True
+    assert payload["execution_mode"] == "dry_run"
+
+
 def test_query_blocks_non_select_sql(monkeypatch):
     monkeypatch.setattr(main.llm, "generate_sql", lambda question, context: "DELETE FROM demo")
 
